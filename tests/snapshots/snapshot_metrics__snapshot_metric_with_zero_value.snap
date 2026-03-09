@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 161
+expression: encoded
+---
+# HELP nibe_counter Counter at zero
+# TYPE nibe_counter counter
+nibe_counter{device_id="test"} 0
+# EOF

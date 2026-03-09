@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 178
+expression: encoded
+---
+# HELP nibe_differential Differential temperature
+# TYPE nibe_differential gauge
+nibe_differential{device_id="test"} -5.3
+# EOF

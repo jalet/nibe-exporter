@@ -1,0 +1,23 @@
+apiVersion: v2
+name: nibe-exporter
+description: Prometheus exporter for NIBE heat pumps via myUplink API
+type: application
+version: 0.0.6
+appVersion: '0.0.6'
+
+keywords:
+  - nibe
+  - heat-pump
+  - prometheus
+  - exporter
+  - myuplink
+
+home: https://github.com/jalet/nibe-exporter
+sources:
+  - https://github.com/jalet/nibe-exporter
+
+maintainers:
+  - name: Joakim Jarsater
+    email: joakim@jarsater.com
+
+dependencies: []

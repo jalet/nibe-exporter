@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 81
+expression: encoded
+---
+# HELP test_metric Help text with\\backslash and\nnewline
+# TYPE test_metric gauge
+test_metric{description="Quote\"in\"value",device_id="device\\with\\backslash",multiline="Line1\nLine2"} 99.9
+# EOF

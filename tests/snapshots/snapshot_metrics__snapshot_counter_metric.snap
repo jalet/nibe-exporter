@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 98
+expression: encoded
+---
+# HELP nibe_polls_total Total number of poll attempts
+# TYPE nibe_polls_total counter
+nibe_polls_total{device_id="nibe-789"} 1234
+# EOF

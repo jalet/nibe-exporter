@@ -1,0 +1,13 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 62
+expression: encoded
+---
+# HELP nibe_return_temperature_celsius Return temperature (BT3)
+# TYPE nibe_return_temperature_celsius gauge
+# HELP nibe_supply_temperature_celsius Supply temperature (BT1)
+# TYPE nibe_supply_temperature_celsius gauge
+nibe_return_temperature_celsius{device_id="nibe-123",parameter_id="40083"} 45.5
+nibe_return_temperature_celsius{device_id="nibe-456",parameter_id="40083"} 42.1
+nibe_supply_temperature_celsius{device_id="nibe-123",parameter_id="40008"} 50.2
+# EOF

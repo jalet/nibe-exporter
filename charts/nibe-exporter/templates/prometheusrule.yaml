@@ -1,0 +1,52 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "nibe-exporter.fullname" . }}
+  namespace: {{ .Values.prometheusRule.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "nibe-exporter.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+  - name: nibe-exporter.rules
+    interval: 30s
+    rules:
+    - alert: NIBEExporterDown
+      expr: up{job="nibe-exporter"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "NIBE exporter is down"
+        description: "NIBE exporter instance {{ $labels.instance }} has been down for more than 5 minutes."
+
+    - alert: NIBEAuthenticationFailures
+      expr: rate(nibe_auth_failures_total[5m]) > 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "NIBE API authentication failures detected"
+        description: "NIBE exporter is experiencing authentication failures. Check myUplink credentials."
+
+    - alert: NIBEHighRateLimit
+      expr: rate(nibe_rate_limited_total[5m]) > 0.1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "NIBE API rate limit exceeded"
+        description: "NIBE exporter is being rate limited. Consider increasing poll interval."
+
+    - alert: NIBEScrapeErrors
+      expr: rate(nibe_scrape_errors_total[5m]) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "NIBE exporter scrape errors"
+        description: "NIBE exporter is encountering errors scraping device metrics."
+{{- end }}

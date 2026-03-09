@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nibe-exporter.fullname" . }}
+  labels:
+    {{- include "nibe-exporter.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "nibe-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nibe-exporter.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nibe-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.exporter.listenAddr | split ":" | last }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+        env:
+        - name: NIBE_LOG_LEVEL
+          value: {{ .Values.exporter.logLevel | quote }}
+        - name: NIBE_LOG_JSON
+          value: {{ .Values.exporter.logJson | quote }}
+        - name: NIBE_POLL_INTERVAL
+          value: {{ .Values.exporter.pollInterval | quote }}
+        - name: NIBE_LISTEN_ADDR
+          value: {{ .Values.exporter.listenAddr | quote }}
+        - name: NIBE_API_VERSION
+          value: {{ .Values.myuplink.apiVersion | quote }}
+        {{- if .Values.myuplink.deviceId }}
+        - name: NIBE_DEVICE_ID
+          value: {{ .Values.myuplink.deviceId | quote }}
+        {{- end }}
+        {{- if .Values.myuplink.clientId }}
+        - name: NIBE_CLIENT_ID
+          value: {{ .Values.myuplink.clientId | quote }}
+        {{- end }}
+        {{- if .Values.myuplink.clientSecret }}
+        - name: NIBE_CLIENT_SECRET
+          value: {{ .Values.myuplink.clientSecret | quote }}
+        {{- else if .Values.myuplink.clientSecretRef.name }}
+        - name: NIBE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.myuplink.clientSecretRef.name }}
+              key: {{ .Values.myuplink.clientSecretRef.key }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

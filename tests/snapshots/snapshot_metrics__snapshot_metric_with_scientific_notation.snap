@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 195
+expression: encoded
+---
+# HELP nibe_small_value Very small measurement
+# TYPE nibe_small_value gauge
+nibe_small_value{device_id="test"} 0.00001234
+# EOF

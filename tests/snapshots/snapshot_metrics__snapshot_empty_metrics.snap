@@ -1,0 +1,6 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 144
+expression: encoded
+---
+# EOF

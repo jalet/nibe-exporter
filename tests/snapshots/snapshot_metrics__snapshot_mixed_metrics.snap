@@ -1,0 +1,13 @@
+---
+source: tests/snapshot_metrics.rs
+assertion_line: 137
+expression: encoded
+---
+# HELP nibe_polls_total Total poll count
+# TYPE nibe_polls_total counter
+# HELP nibe_temperature_celsius Current temperature
+# TYPE nibe_temperature_celsius gauge
+nibe_polls_total{device_id="nibe-123"} 5000
+nibe_temperature_celsius{device_id="nibe-123"} 45.5
+nibe_temperature_celsius{device_id="nibe-456"} 38.2
+# EOF

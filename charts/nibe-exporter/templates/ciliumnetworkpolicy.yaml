@@ -1,0 +1,36 @@
+{{- if .Values.ciliumNetworkPolicy.enabled }}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "nibe-exporter.fullname" . }}
+  labels:
+    {{- include "nibe-exporter.labels" . | nindent 4 }}
+spec:
+  description: "Network policy for nibe-exporter"
+  endpointSelector:
+    matchLabels:
+      {{- include "nibe-exporter.selectorLabels" . | nindent 6 }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: prometheus
+    toPorts:
+    - ports:
+      - port: "9090"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchExpressions:
+      - key: io.kubernetes.namespace.name
+        operator: Exists
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
+  - toFQDNs:
+    - matchName: "api.myuplink.com"
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
+{{- end }}

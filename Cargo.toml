@@ -1,0 +1,66 @@
+[package]
+name = "nibe-exporter"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+authors = ["NIBE Contributors"]
+license = "MIT"
+description = "Prometheus exporter for NIBE heat pumps via myUplink REST API"
+repository = "https://github.com/jalet/nibe-exporter"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+unwrap_used = "warn"
+expect_used = "warn"
+
+[dependencies]
+axum = "0.7"
+clap = { version = "4.5", features = ["derive", "env"] }
+futures-util = "0.3"
+reqwest = { version = "0.12", features = ["rustls-tls", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+http = "1.0"
+async-trait = "0.1"
+secrecy = { version = "0.8", features = ["serde"] }
+
+[dev-dependencies]
+insta = { version = "1.39", features = ["json"] }
+tokio-test = "0.4"
+wiremock = "0.6"
+tower = { version = "0.4", features = ["util"] }
+tempfile = "3.10"
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"
+
+[[test]]
+name = "snapshot_metrics"
+path = "tests/snapshot_metrics.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+
+[profile.test]
+opt-level = 1
