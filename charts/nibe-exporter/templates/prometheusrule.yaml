@@ -21,7 +21,7 @@ spec:
         severity: critical
       annotations:
         summary: "NIBE exporter is down"
-        description: "NIBE exporter instance {{ $labels.instance }} has been down for more than 5 minutes."
+        description: "NIBE exporter instance {{`{{ $labels.instance }}`}} has been down for more than 5 minutes."
 
     - alert: NIBEAuthenticationFailures
       expr: rate(nibe_auth_failures_total[5m]) > 0

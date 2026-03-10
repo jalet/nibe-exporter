@@ -96,12 +96,11 @@ deploy_exporter() {
         --set myuplink.clientSecretRef.name=nibe-credentials \
         --set myuplink.clientSecretRef.key=client-secret \
         --set myuplink.clientId=test-client-id \
-        --set exporter.logLevel=debug \
-        || true
+        --set exporter.logLevel=debug
 
     # Wait for deployment
     kubectl wait --for=condition=available --timeout=300s \
-        deployment/nibe-exporter -n nibe-exporter || true
+        deployment/nibe-exporter -n nibe-exporter
 
     echo -e "${GREEN}✓ Exporter deployed${NC}"
 }
