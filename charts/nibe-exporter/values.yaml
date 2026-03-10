@@ -89,6 +89,7 @@ exporter:
   logJson: false
   pollInterval: 60
   listenAddr: '0.0.0.0:9090'
+  port: 9090
 
 # Prometheus ServiceMonitor
 serviceMonitor:
