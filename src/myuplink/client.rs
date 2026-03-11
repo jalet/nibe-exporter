@@ -1,6 +1,6 @@
 use crate::myuplink::auth::TokenManager;
 use crate::myuplink::error::MyUplinkError;
-use crate::myuplink::models::DeviceInfo;
+use crate::myuplink::models::{DeviceInfo, StatusResponse};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -46,7 +46,8 @@ impl MyUplinkClient {
 
     /// Fetch devices and parameters from myUplink API.
     ///
-    /// Makes authenticated request to `/api/v2/devices` or `/api/v3/devices`.
+    /// Makes authenticated request to `/v2/systems/me` or `/v3/systems/me`.
+    /// Extracts all devices from all systems in the user's account.
     /// Handles 401 by invalidating token and retrying once.
     /// Handles 429 by returning error with `retry_after` if present.
     ///
@@ -66,7 +67,7 @@ impl MyUplinkClient {
     > {
         Box::pin(async move {
             let token = self.token_manager.get_token().await?;
-            let url = format!("{}/devices", self.base_url);
+            let url = format!("{}/systems/me", self.base_url);
 
             let response = self
                 .http_client
@@ -105,10 +106,20 @@ impl MyUplinkClient {
                 });
             }
 
-            let devices: Vec<DeviceInfo> = response
+            let status_response: StatusResponse = response
                 .json()
                 .await
                 .map_err(|e| MyUplinkError::ParseError(e.to_string()))?;
+
+            // Extract all devices from all systems
+            let mut devices = Vec::new();
+            if let Some(systems) = status_response.systems {
+                for system in systems {
+                    if let Some(system_devices) = system.devices {
+                        devices.extend(system_devices);
+                    }
+                }
+            }
 
             Ok(devices)
         })
