@@ -5,6 +5,7 @@
   "changelog-type": "github",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
+  "tag-separator": "v",
   "pull-request-title-pattern": "chore(release): ${version}",
   "pull-request-header": "## nibe-exporter Release\n\nThis PR contains automated version bumps for the Rust project and Helm chart.",
   "extra-files": [
