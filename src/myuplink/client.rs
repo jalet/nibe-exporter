@@ -77,7 +77,7 @@ impl MyUplinkClient {
             let response = self
                 .http_client
                 .get(&url)
-                .header("Authorization", format!("Bearer {}", token))
+                .header("Authorization", format!("Bearer {token}"))
                 .timeout(Duration::from_secs(30))
                 .send()
                 .await
@@ -191,7 +191,7 @@ impl MyUplinkClient {
         let response = self
             .http_client
             .get(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .timeout(Duration::from_secs(30))
             .send()
             .await
@@ -231,21 +231,18 @@ impl MyUplinkClient {
                 }
 
                 point.value.and_then(|v| {
-                    match serde_json::Number::from_f64(v) {
-                        Some(num) => {
-                            debug!("Including parameter {}: {} = {}", point.parameter_id, point.parameter_name.as_deref().unwrap_or("(no name)"), v);
-                            Some(Parameter {
-                                parameter_id: point.parameter_id,
-                                name: point.parameter_name,
-                                unit: point.parameter_unit,
-                                value: Some(ParameterValue::Numeric(num)),
-                                parameter_type: None,
-                            })
-                        }
-                        None => {
-                            warn!("Failed to convert value {} to JSON number for parameter {}", v, point.parameter_id);
-                            None
-                        }
+                    if let Some(num) = serde_json::Number::from_f64(v) {
+                        debug!("Including parameter {}: {} = {}", point.parameter_id, point.parameter_name.as_deref().unwrap_or("(no name)"), v);
+                        Some(Parameter {
+                            parameter_id: point.parameter_id,
+                            name: point.parameter_name,
+                            unit: point.parameter_unit,
+                            value: Some(ParameterValue::Numeric(num)),
+                            parameter_type: None,
+                        })
+                    } else {
+                        warn!("Failed to convert value {} to JSON number for parameter {}", v, point.parameter_id);
+                        None
                     }
                 })
             })

@@ -29,7 +29,7 @@ pub struct MetricSample {
 /// Map a parameter to a metric sample with the parameter ID in the name.
 ///
 /// Metric names follow the pattern `nibe_parameter_{id}` and can be renamed
-/// using Prometheus relabel_configs in the ServiceMonitor configuration.
+/// using Prometheus `relabel_configs` in the `ServiceMonitor` configuration.
 #[must_use]
 pub fn map_parameter_to_samples(
     parameter_id: &str,
