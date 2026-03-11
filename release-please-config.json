@@ -1,0 +1,22 @@
+{
+  "release-type": "rust",
+  "package-name": "nibe-exporter",
+  "changelog-path": "CHANGELOG.md",
+  "changelog-type": "github",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "pull-request-title-pattern": "chore(release): ${version}",
+  "pull-request-header": "## nibe-exporter Release\n\nThis PR contains automated version bumps for the Rust project and Helm chart.",
+  "extra-files": [
+    {
+      "type": "yaml",
+      "file": "charts/nibe-exporter/Chart.yaml",
+      "updaters": [
+        {
+          "type": "yaml",
+          "paths": ["version", "appVersion"]
+        }
+      ]
+    }
+  ]
+}
