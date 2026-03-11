@@ -77,7 +77,7 @@ impl MyUplinkClient {
             let response = self
                 .http_client
                 .get(&url)
-                .header("Authorization", format!("Bearer {}", "***redacted***"))
+                .header("Authorization", format!("Bearer {}", token))
                 .timeout(Duration::from_secs(30))
                 .send()
                 .await
@@ -184,14 +184,14 @@ impl MyUplinkClient {
     /// # Errors
     ///
     /// Returns `MyUplinkError` for network errors or API errors.
-    async fn fetch_device_points(&self, _token: &str, device_id: &str) -> Result<Vec<Parameter>, MyUplinkError> {
+    async fn fetch_device_points(&self, token: &str, device_id: &str) -> Result<Vec<Parameter>, MyUplinkError> {
         let url = format!("{}/devices/{device_id}/points", self.base_url);
         debug!("Fetching device points: GET {}", url);
 
         let response = self
             .http_client
             .get(&url)
-            .header("Authorization", format!("Bearer {}", "***redacted***"))
+            .header("Authorization", format!("Bearer {}", token))
             .timeout(Duration::from_secs(30))
             .send()
             .await

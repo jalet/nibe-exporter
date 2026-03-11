@@ -99,11 +99,10 @@ impl TokenManager {
     /// Refresh the token from the `OAuth2` endpoint.
     async fn refresh_token(&self) -> Result<TokenResponse, MyUplinkError> {
         let client = reqwest::Client::new();
-        let params = [
-            ("grant_type", "client_credentials"),
-            ("client_id", &self.client_id),
-            ("client_secret", &self.client_secret),
-        ];
+        let mut params = std::collections::HashMap::new();
+        params.insert("grant_type", "client_credentials".to_string());
+        params.insert("client_id", self.client_id.clone());
+        params.insert("client_secret", self.client_secret.clone());
 
         debug!("POST {} with client_id: {}", &self.token_url, &self.client_id);
         let response = client
