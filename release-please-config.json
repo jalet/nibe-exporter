@@ -11,13 +11,7 @@
   "extra-files": [
     {
       "type": "yaml",
-      "file": "charts/nibe-exporter/Chart.yaml",
-      "updaters": [
-        {
-          "type": "yaml",
-          "paths": ["version", "appVersion"]
-        }
-      ]
+      "file": "charts/nibe-exporter/Chart.yaml"
     }
   ]
 }
