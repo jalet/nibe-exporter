@@ -1,6 +1,7 @@
 use crate::myuplink::error::MyUplinkError;
 use crate::myuplink::models::TokenResponse;
 use tokio::sync::RwLock;
+use tracing::{debug, error};
 
 /// Token state: (token, `expires_at_ms`).
 #[derive(Clone, Debug)]
@@ -56,23 +57,30 @@ impl TokenManager {
             let state = self.inner.read().await;
             if let Some(token_state) = state.as_ref() {
                 if token_state.is_valid() {
+                    debug!("Using cached OAuth token (still valid)");
                     return Ok(token_state.token.clone());
                 }
             }
         }
+
+        debug!("Token not cached or expired, refreshing...");
 
         // Slow path: write lock + double-check
         {
             let state = self.inner.write().await;
             if let Some(token_state) = state.as_ref() {
                 if token_state.is_valid() {
+                    debug!("Using cached OAuth token from write lock");
                     return Ok(token_state.token.clone());
                 }
             }
         }
 
         // Token is invalid or missing; refresh it
+        debug!("Calling OAuth2 refresh endpoint: {}", &self.token_url);
         let response = self.refresh_token().await?;
+        debug!("Successfully refreshed OAuth token (expires_in: {}s)", response.expires_in);
+
         #[allow(clippy::cast_possible_truncation)]
         let expires_at_ms = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -97,23 +105,34 @@ impl TokenManager {
             ("client_secret", &self.client_secret),
         ];
 
+        debug!("POST {} with client_id: {}", &self.token_url, &self.client_id);
         let response = client
             .post(&self.token_url)
             .form(&params)
             .send()
             .await
-            .map_err(|e| MyUplinkError::Network(e.to_string()))?;
+            .map_err(|e| {
+                error!("Network error calling OAuth token endpoint {}: {}", &self.token_url, e);
+                MyUplinkError::Network(e.to_string())
+            })?;
 
-        if !response.status().is_success() {
+        let status = response.status();
+        debug!("OAuth token response status: {}", status.as_u16());
+
+        if !status.is_success() {
+            error!("OAuth token endpoint returned {} from {}", status.as_u16(), &self.token_url);
             return Err(MyUplinkError::Http {
-                status: response.status().as_u16(),
+                status: status.as_u16(),
             });
         }
 
         response
             .json::<TokenResponse>()
             .await
-            .map_err(|e| MyUplinkError::ParseError(e.to_string()))
+            .map_err(|e| {
+                error!("Failed to parse OAuth token response: {}", e);
+                MyUplinkError::ParseError(e.to_string())
+            })
     }
 
     /// Invalidate the cached token (force refresh on next request).
