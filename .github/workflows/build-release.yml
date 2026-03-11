@@ -29,7 +29,7 @@ jobs:
         id: version
         run: |
           if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+            VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
           else
             VERSION=$(git describe --tags --abbrev=0 | sed 's/^v//')
           fi
@@ -81,7 +81,7 @@ jobs:
         id: version
         run: |
           if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+            VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
           else
             VERSION=$(git describe --tags --abbrev=0 | sed 's/^v//')
           fi
@@ -97,8 +97,8 @@ jobs:
 
       - name: Build Helm chart
         run: |
-          helm package charts/nibe-exporter
+          helm package charts/nibe-exporter --version ${{ steps.version.outputs.version }}
 
       - name: Push Helm chart to OCI registry
         run: |
-          helm push nibe-exporter-*.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}
+          helm push nibe-exporter-${{ steps.version.outputs.version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}
