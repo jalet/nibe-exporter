@@ -21,4 +21,8 @@ spec:
     {{- if .Values.serviceMonitor.honorLabels }}
     honorLabels: true
     {{- end }}
+    {{- if .Values.serviceMonitor.metricRelabeling }}
+    metricRelabelings:
+      {{- toYaml .Values.serviceMonitor.metricRelabeling | nindent 6 }}
+    {{- end }}
 {{- end }}

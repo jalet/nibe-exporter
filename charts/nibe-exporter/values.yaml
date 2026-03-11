@@ -99,6 +99,19 @@ serviceMonitor:
   scrapeTimeout: 10s
   labels: {}
   honorLabels: false
+  # Metric relabeling rules to rename nibe_parameter_* metrics to human-readable names
+  # This allows configuration-driven mapping of parameter IDs to metric names without code changes
+  # Each rule matches the parameter_id label and renames the metric accordingly
+  # Example: Map parameter_id "40012" to "nibe_return_line_bt3"
+  metricRelabeling: []
+  #  - sourceLabels: [parameter_id]
+  #    regex: '40012'
+  #    target_label: __name__
+  #    replacement: 'nibe_return_line_bt3'
+  #  - sourceLabels: [parameter_id]
+  #    regex: '40008'
+  #    target_label: __name__
+  #    replacement: 'nibe_supply_line_bt2'
 
 # Prometheus PrometheusRule
 prometheusRule:
