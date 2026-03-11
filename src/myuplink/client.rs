@@ -33,7 +33,8 @@ impl MyUplinkClient {
         }
 
         let base_url = format!("https://api.myuplink.com/{api_version}");
-        let token_url = format!("{base_url}/oauth/token");
+        // OAuth token endpoint is not versioned - it's at the root level
+        let token_url = "https://api.myuplink.com/oauth/token".to_string();
 
         let token_manager = Arc::new(TokenManager::new(client_id, client_secret, token_url));
 

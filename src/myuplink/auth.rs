@@ -120,15 +120,23 @@ impl TokenManager {
         debug!("OAuth token response status: {}", status.as_u16());
 
         if !status.is_success() {
+            // Try to get error details from response body
+            let error_body = response.text().await.unwrap_or_else(|_| "(no body)".to_string());
             error!("OAuth token endpoint returned {} from {}", status.as_u16(), &self.token_url);
+            error!("Response body: {}", error_body);
             return Err(MyUplinkError::Http {
                 status: status.as_u16(),
             });
         }
 
-        response
-            .json::<TokenResponse>()
-            .await
+        let text = response.text().await.map_err(|e| {
+            error!("Failed to read OAuth token response body: {}", e);
+            MyUplinkError::ParseError(e.to_string())
+        })?;
+
+        debug!("OAuth response body: {}", text);
+
+        serde_json::from_str::<TokenResponse>(&text)
             .map_err(|e| {
                 error!("Failed to parse OAuth token response: {}", e);
                 MyUplinkError::ParseError(e.to_string())
