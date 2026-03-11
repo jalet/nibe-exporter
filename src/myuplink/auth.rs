@@ -79,7 +79,10 @@ impl TokenManager {
         // Token is invalid or missing; refresh it
         debug!("Calling OAuth2 refresh endpoint: {}", &self.token_url);
         let response = self.refresh_token().await?;
-        debug!("Successfully refreshed OAuth token (expires_in: {}s)", response.expires_in);
+        debug!(
+            "Successfully refreshed OAuth token (expires_in: {}s)",
+            response.expires_in
+        );
 
         #[allow(clippy::cast_possible_truncation)]
         let expires_at_ms = std::time::SystemTime::now()
@@ -104,14 +107,20 @@ impl TokenManager {
         params.insert("client_id", self.client_id.clone());
         params.insert("client_secret", self.client_secret.clone());
 
-        debug!("POST {} with client_id: {}", &self.token_url, &self.client_id);
+        debug!(
+            "POST {} with client_id: {}",
+            &self.token_url, &self.client_id
+        );
         let response = client
             .post(&self.token_url)
             .form(&params)
             .send()
             .await
             .map_err(|e| {
-                error!("Network error calling OAuth token endpoint {}: {}", &self.token_url, e);
+                error!(
+                    "Network error calling OAuth token endpoint {}: {}",
+                    &self.token_url, e
+                );
                 MyUplinkError::Network(e.to_string())
             })?;
 
@@ -120,8 +129,15 @@ impl TokenManager {
 
         if !status.is_success() {
             // Try to get error details from response body
-            let error_body = response.text().await.unwrap_or_else(|_| "(no body)".to_string());
-            error!("OAuth token endpoint returned {} from {}", status.as_u16(), &self.token_url);
+            let error_body = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "(no body)".to_string());
+            error!(
+                "OAuth token endpoint returned {} from {}",
+                status.as_u16(),
+                &self.token_url
+            );
             error!("Response body: {}", error_body);
             return Err(MyUplinkError::Http {
                 status: status.as_u16(),
@@ -135,11 +151,10 @@ impl TokenManager {
 
         debug!("OAuth response body: {}", text);
 
-        serde_json::from_str::<TokenResponse>(&text)
-            .map_err(|e| {
-                error!("Failed to parse OAuth token response: {}", e);
-                MyUplinkError::ParseError(e.to_string())
-            })
+        serde_json::from_str::<TokenResponse>(&text).map_err(|e| {
+            error!("Failed to parse OAuth token response: {}", e);
+            MyUplinkError::ParseError(e.to_string())
+        })
     }
 
     /// Invalidate the cached token (force refresh on next request).

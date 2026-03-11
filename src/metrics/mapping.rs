@@ -40,7 +40,9 @@ pub fn map_parameter_to_samples(
     vec![MetricSample {
         name: format!("nibe_parameter_{parameter_id}"),
         metric_type: MetricType::Gauge,
-        help: parameter_name.unwrap_or(&format!("Parameter {parameter_id}")).to_string(),
+        help: parameter_name
+            .unwrap_or(&format!("Parameter {parameter_id}"))
+            .to_string(),
         value,
         labels: {
             let mut m = HashMap::new();
@@ -73,7 +75,10 @@ mod tests {
         let labels = &samples[0].labels;
         assert_eq!(labels.get("device_id"), Some(&"device1".to_string()));
         assert_eq!(labels.get("parameter_id"), Some(&"40012".to_string()));
-        assert_eq!(labels.get("parameter_name"), Some(&"Return line (BT3)".to_string()));
+        assert_eq!(
+            labels.get("parameter_name"),
+            Some(&"Return line (BT3)".to_string())
+        );
     }
 
     #[test]
