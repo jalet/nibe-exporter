@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1](https://github.com/jalet/nibe-exporter/compare/v0.1.0...v0.1.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* **clippy:** resolve doc-markdown and formatting warnings ([feb67bf](https://github.com/jalet/nibe-exporter/commit/feb67bf1119fde48d8bba7d32a8d0d21a9ee089d))
+
 ## [0.1.0](https://github.com/jalet/nibe-exporter/compare/v0.0.8...v0.1.0) (2026-03-11)
 
 
