@@ -7,12 +7,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  packages: write
-  id-token: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   release-please:
@@ -45,87 +39,3 @@ jobs:
           prerelease: false
           generate_release_notes: true
 
-  build-docker:
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    needs: release-please
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}.{{minor}}.{{patch}}
-
-      - uses: docker/build-push-action@v5
-        id: build
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - uses: sigstore/cosign-installer@v3
-      - uses: anchore/sbom-action@v0
-        with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-          format: cyclonedx-json
-          output-file: sbom.cyclonedx.json
-          upload-release-assets: false
-
-      - name: Sign image
-        env:
-          COSIGN_EXPERIMENTAL: 1
-        run: |
-          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-
-  publish-helm:
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    needs: release-please
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: azure/setup-helm@v4
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Helm chart
-        run: |
-          helm package charts/nibe-exporter
-
-      - name: Push Helm chart to OCI registry
-        run: |
-          helm push nibe-exporter-*.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}
-
-      - name: Upload Helm chart to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: nibe-exporter-*.tgz
