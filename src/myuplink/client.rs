@@ -130,60 +130,66 @@ impl MyUplinkClient {
                 MyUplinkError::ParseError(e.to_string())
             })?;
 
-            // Extract all devices from all systems and fetch their parameters
-            let mut devices = Vec::new();
-            if let Some(systems) = status_response.systems {
-                debug!("Found {} system(s)", systems.len());
-                for system in systems {
-                    debug!("Processing system: {}", system.system_id);
-                    if let Some(system_devices) = system.devices {
-                        debug!(
-                            "System {} has {} device(s)",
-                            system.system_id,
-                            system_devices.len()
-                        );
-                        for sys_device in system_devices {
-                            debug!("Fetching parameters for device: {}", sys_device.id);
-                            // Fetch parameters for this device
-                            match self.fetch_device_points(&token, &sys_device.id).await {
-                                Ok(parameters) => {
-                                    debug!(
-                                        "Device {} has {} parameter(s)",
-                                        sys_device.id,
-                                        parameters.len()
-                                    );
-                                    devices.push(DeviceInfo {
-                                        device_id: sys_device.id.clone(),
-                                        name: None,
-                                        product: sys_device.product,
-                                        parameters: if parameters.is_empty() {
-                                            None
-                                        } else {
-                                            Some(parameters)
-                                        },
-                                    });
-                                }
-                                Err(e) => {
-                                    error!(
-                                        "Failed to fetch parameters for device {}: {}",
-                                        sys_device.id, e
-                                    );
-                                    // Continue with next device instead of failing
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                warn!("No systems found in response");
-            }
-
+            let devices = self.process_systems_devices(&token, status_response).await;
             debug!(
                 "Successfully fetched {} device(s) with parameters",
                 devices.len()
             );
             Ok(devices)
         })
+    }
+
+    /// Extract devices from systems and fetch their parameters.
+    async fn process_systems_devices(
+        &self,
+        token: &str,
+        status_response: StatusResponse,
+    ) -> Vec<DeviceInfo> {
+        let mut devices = Vec::new();
+        if let Some(systems) = status_response.systems {
+            debug!("Found {} system(s)", systems.len());
+            for system in systems {
+                debug!("Processing system: {}", system.system_id);
+                if let Some(system_devices) = system.devices {
+                    debug!(
+                        "System {} has {} device(s)",
+                        system.system_id,
+                        system_devices.len()
+                    );
+                    for sys_device in system_devices {
+                        debug!("Fetching parameters for device: {}", sys_device.id);
+                        match self.fetch_device_points(token, &sys_device.id).await {
+                            Ok(parameters) => {
+                                debug!(
+                                    "Device {} has {} parameter(s)",
+                                    sys_device.id,
+                                    parameters.len()
+                                );
+                                devices.push(DeviceInfo {
+                                    device_id: sys_device.id.clone(),
+                                    name: None,
+                                    product: sys_device.product,
+                                    parameters: if parameters.is_empty() {
+                                        None
+                                    } else {
+                                        Some(parameters)
+                                    },
+                                });
+                            }
+                            Err(e) => {
+                                error!(
+                                    "Failed to fetch parameters for device {}: {}",
+                                    sys_device.id, e
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            warn!("No systems found in response");
+        }
+        devices
     }
 
     /// Get API version.
