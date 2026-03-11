@@ -34,15 +34,18 @@ pub struct DeviceInfo {
     pub parameters: Option<Vec<Parameter>>,
 }
 
-/// Product metadata.
+/// Product metadata (flexible to handle both systems and devices responses).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Product {
-    /// Product name (e.g., "NIBE F2120").
-    #[serde(rename = "productName")]
-    pub product_name: String,
-    /// Product series identifier.
+    /// Product name from either `productName` or `name` field.
+    #[serde(alias = "productName")]
+    pub name: Option<String>,
+    /// Product series identifier (optional).
     #[serde(rename = "productSeries")]
     pub product_series: Option<String>,
+    /// Serial number (from systems response).
+    #[serde(rename = "serialNumber")]
+    pub serial_number: Option<String>,
 }
 
 /// Single parameter from myUplink device.
@@ -101,14 +104,14 @@ impl ParameterValue {
     }
 }
 
-/// Multi-device status response.
+/// Multi-device status response from `/systems/me`.
 #[derive(Debug, Deserialize)]
 pub struct StatusResponse {
     /// List of systems and their devices.
     pub systems: Option<Vec<SystemInfo>>,
 }
 
-/// System information.
+/// System information from `/systems/me`.
 #[derive(Debug, Deserialize)]
 pub struct SystemInfo {
     /// Unique system identifier.
@@ -117,7 +120,35 @@ pub struct SystemInfo {
     /// Human-readable system name.
     pub name: Option<String>,
     /// Devices in this system.
-    pub devices: Option<Vec<DeviceInfo>>,
+    pub devices: Option<Vec<SystemDevice>>,
+}
+
+/// Device in system (from `/systems/me`).
+#[derive(Debug, Clone, Deserialize)]
+pub struct SystemDevice {
+    /// Device identifier.
+    pub id: String,
+    /// Connection state.
+    #[serde(rename = "connectionState")]
+    pub connection_state: Option<String>,
+    /// Product information.
+    pub product: Option<Product>,
+}
+
+/// Device point/parameter from `/devices/{id}/points`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct DevicePoint {
+    /// Parameter ID.
+    #[serde(rename = "parameterId")]
+    pub parameter_id: String,
+    /// Parameter name.
+    #[serde(rename = "parameterName")]
+    pub parameter_name: Option<String>,
+    /// Unit of measurement.
+    #[serde(rename = "parameterUnit")]
+    pub parameter_unit: Option<String>,
+    /// Current parameter value.
+    pub value: Option<f64>,
 }
 
 /// Metrics mapping configuration (parameter -> metric).

@@ -1,6 +1,6 @@
 use crate::myuplink::auth::TokenManager;
 use crate::myuplink::error::MyUplinkError;
-use crate::myuplink::models::{DeviceInfo, StatusResponse};
+use crate::myuplink::models::{DeviceInfo, DevicePoint, Parameter, ParameterValue, StatusResponse};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -111,12 +111,22 @@ impl MyUplinkClient {
                 .await
                 .map_err(|e| MyUplinkError::ParseError(e.to_string()))?;
 
-            // Extract all devices from all systems
+            // Extract all devices from all systems and fetch their parameters
             let mut devices = Vec::new();
             if let Some(systems) = status_response.systems {
                 for system in systems {
                     if let Some(system_devices) = system.devices {
-                        devices.extend(system_devices);
+                        for sys_device in system_devices {
+                            // Fetch parameters for this device
+                            let parameters = self.fetch_device_points(&token, &sys_device.id).await.unwrap_or_default();
+
+                            devices.push(DeviceInfo {
+                                device_id: sys_device.id,
+                                name: None,
+                                product: sys_device.product,
+                                parameters: if parameters.is_empty() { None } else { Some(parameters) },
+                            });
+                        }
                     }
                 }
             }
@@ -135,6 +145,56 @@ impl MyUplinkClient {
     #[must_use]
     pub fn base_url(&self) -> &str {
         &self.base_url
+    }
+
+    /// Fetch device parameters/points from myUplink API.
+    ///
+    /// Makes authenticated request to `/v2/devices/{id}/points` or `/v3/devices/{id}/points`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `MyUplinkError` for network errors or API errors.
+    async fn fetch_device_points(&self, token: &str, device_id: &str) -> Result<Vec<Parameter>, MyUplinkError> {
+        let url = format!("{}/devices/{device_id}/points", self.base_url);
+
+        let response = self
+            .http_client
+            .get(&url)
+            .header("Authorization", format!("Bearer {token}"))
+            .timeout(Duration::from_secs(30))
+            .send()
+            .await
+            .map_err(|e| MyUplinkError::Network(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(MyUplinkError::Http {
+                status: response.status().as_u16(),
+            });
+        }
+
+        let points: Vec<DevicePoint> = response
+            .json()
+            .await
+            .map_err(|e| MyUplinkError::ParseError(e.to_string()))?;
+
+        // Convert DevicePoint to Parameter
+        let parameters = points
+            .into_iter()
+            .filter_map(|point| {
+                // Only include points with values
+                point.value.and_then(|v| {
+                    serde_json::Number::from_f64(v).map(|num| Parameter {
+                        parameter_id: point.parameter_id,
+                        name: point.parameter_name,
+                        unit: point.parameter_unit,
+                        value: Some(ParameterValue::Numeric(num)),
+                        parameter_type: None,
+                    })
+                })
+            })
+            .collect();
+
+        Ok(parameters)
     }
 }
 
