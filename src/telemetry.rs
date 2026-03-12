@@ -17,7 +17,6 @@ pub fn init_telemetry(log_level: &str, json: bool) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_init_telemetry_text() {

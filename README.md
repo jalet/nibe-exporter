@@ -96,8 +96,8 @@ All configuration is via environment variables. Required and optional variables:
 
 | Variable | Default | Purpose | Example |
 |----------|---------|---------|---------|
-| `NIBE_CLIENT_ID` | — | myUplink OAuth2 Client ID | `abc123...` |
-| `NIBE_CLIENT_SECRET` | — | myUplink OAuth2 Client Secret | `xyz789...` |
+| `NIBE_CLIENT_ID` | — | myUplink `OAuth2` Client ID | `abc123...` |
+| `NIBE_CLIENT_SECRET` | — | myUplink `OAuth2` Client Secret | `xyz789...` |
 | `NIBE_API_VERSION` | `v2` | myUplink API version (`v2` or `v3`) | `v2` |
 | `NIBE_DEVICE_ID` | — | (Optional) Filter metrics to specific device ID | `device-abc123` |
 | `NIBE_POLL_INTERVAL` | `60` | Poll interval in seconds | `60` |

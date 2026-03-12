@@ -5,12 +5,12 @@ use axum::http::Request;
 use nibe_exporter::config::Config;
 use nibe_exporter::metrics::{MetricSample, MetricType};
 use nibe_exporter::myuplink::error::MyUplinkError;
-use nibe_exporter::myuplink::models::{DeviceInfo, Parameter, ParameterValue, Product};
+use nibe_exporter::myuplink::models::ParameterValue;
 use nibe_exporter::server::build_router;
 use std::collections::HashMap;
 use tower::ServiceExt;
 
-/// Test 1: MyUplinkClient validates API version at parse time.
+/// Test 1: `MyUplinkClient` validates API version at parse time.
 #[test]
 fn test_client_rejects_invalid_api_version() {
     let result = nibe_exporter::myuplink::MyUplinkClient::new(
@@ -21,7 +21,7 @@ fn test_client_rejects_invalid_api_version() {
     assert!(matches!(result, Err(MyUplinkError::InvalidApiVersion(_))));
 }
 
-/// Test 2: MyUplinkClient accepts valid API versions.
+/// Test 2: `MyUplinkClient` accepts valid API versions.
 #[test]
 fn test_client_accepts_valid_v2() {
     let result = nibe_exporter::myuplink::MyUplinkClient::new(
@@ -32,7 +32,7 @@ fn test_client_accepts_valid_v2() {
     assert!(result.is_ok());
 }
 
-/// Test 3: MyUplinkClient accepts v3.
+/// Test 3: `MyUplinkClient` accepts v3.
 #[test]
 fn test_client_accepts_valid_v3() {
     let result = nibe_exporter::myuplink::MyUplinkClient::new(
@@ -43,7 +43,7 @@ fn test_client_accepts_valid_v3() {
     assert!(result.is_ok());
 }
 
-/// Test 4: ParameterValue numeric conversion.
+/// Test 4: `ParameterValue` numeric conversion.
 #[test]
 fn test_parameter_value_numeric_conversion() {
     let numeric = ParameterValue::Numeric(serde_json::Number::from_f64(42.5).unwrap());
@@ -56,7 +56,7 @@ fn test_parameter_value_numeric_conversion() {
     assert_eq!(non_numeric.as_numeric(), None);
 }
 
-/// Test 5: ParameterValue scaling.
+/// Test 5: `ParameterValue` scaling.
 #[test]
 fn test_parameter_value_scaling() {
     let value = ParameterValue::Numeric(serde_json::Number::from_f64(100.0).unwrap());
@@ -65,7 +65,7 @@ fn test_parameter_value_scaling() {
     assert_eq!(value.as_numeric_scaled(1), Some(1000.0));
 }
 
-/// Test 6: MetricsStore initializes with empty cache.
+/// Test 6: `MetricsStore` initializes with empty cache.
 #[tokio::test]
 async fn test_metrics_store_initialization() {
     let store = nibe_exporter::metrics::MetricsStore::new();
@@ -75,7 +75,7 @@ async fn test_metrics_store_initialization() {
     assert_eq!(store.rate_limited_total(), 0);
 }
 
-/// Test 7: MetricsStore caches metrics efficiently.
+/// Test 7: `MetricsStore` caches metrics efficiently.
 #[tokio::test]
 async fn test_metrics_store_caching() {
     let store = nibe_exporter::metrics::MetricsStore::new();
@@ -152,7 +152,7 @@ async fn test_ready_endpoint_ready() {
     assert_eq!(response.status(), 200);
 }
 
-/// Test 11: HTTP /metrics endpoint returns OpenMetrics format.
+/// Test 11: HTTP /metrics endpoint returns `OpenMetrics` format.
 #[tokio::test]
 async fn test_metrics_endpoint() {
     let store = nibe_exporter::metrics::MetricsStore::new();
@@ -184,7 +184,7 @@ async fn test_metrics_endpoint() {
     assert!(content_type.contains("openmetrics-text"));
 }
 
-/// Test 12: Config validation requires client_id.
+/// Test 12: Config validation requires `client_id`.
 #[test]
 fn test_config_validation_missing_client_id() {
     let mut config = Config {
@@ -204,7 +204,7 @@ fn test_config_validation_missing_client_id() {
     assert!(config.validate().is_err());
 }
 
-/// Test 13: Config validation requires client_secret.
+/// Test 13: Config validation requires `client_secret`.
 #[test]
 fn test_config_validation_missing_client_secret() {
     let mut config = Config {
@@ -244,7 +244,7 @@ fn test_config_validation_invalid_api_version() {
     assert!(config.validate().is_err());
 }
 
-/// Test 15: Metrics encoding produces valid OpenMetrics format.
+/// Test 15: Metrics encoding produces valid `OpenMetrics` format.
 #[test]
 fn test_metrics_encoding() {
     let mut labels = HashMap::new();
@@ -291,7 +291,7 @@ fn test_metric_type_encoding() {
     assert!(encoded.contains("# TYPE test_counter counter"));
 }
 
-/// Test 17: Parameter mapping preserves device_id label.
+/// Test 17: Parameter mapping preserves `device_id` label.
 #[test]
 fn test_parameter_mapping_device_id() {
     let samples =
