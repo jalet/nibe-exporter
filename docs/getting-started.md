@@ -61,16 +61,16 @@ You should see JSON output similar to:
 
 ```bash
 TOKEN="your-access-token-here"
-curl -s "https://api.myuplink.com/v2/devices" \
-  -H "Authorization: Bearer $TOKEN" | grep -o '"deviceId":"[^"]*"'
+curl -s "https://api.myuplink.com/v2/systems/me" \
+  -H "Authorization: Bearer $TOKEN" | grep -o '"systemId":"[^"]*"' | head -1
 ```
 
 You should see output like:
 ```
-"deviceId":"abc123def456"
+"systemId":"abc123def456"
 ```
 
-Save this Device ID. If you have multiple devices, pick the one for your NIBE heat pump.
+Save this system ID (the exporter uses this as the device ID). If you have multiple systems, pick the one for your NIBE heat pump.
 
 ## Step 3: Run the Exporter with Docker
 
@@ -121,7 +121,7 @@ curl http://localhost:9090/healthz
 
 ```bash
 curl http://localhost:9090/ready
-# Expected output: OK (after ~10 seconds when first metrics are fetched)
+# Expected output: Ready (after ~60 seconds when first metrics are fetched)
 ```
 
 3. **Prometheus metrics** (the actual metrics endpoint):
@@ -133,21 +133,21 @@ curl http://localhost:9090/metrics
 You should see metrics in OpenMetrics format, like:
 
 ```
-# HELP nibe_supply_temperature_celsius Supply temperature
-# TYPE nibe_supply_temperature_celsius gauge
-nibe_supply_temperature_celsius{device_id="abc123def456",name="BT1 Supply temp",parameter_id="40008"} 35.2
+# HELP nibe_parameter_40008 BT1 Supply temp
+# TYPE nibe_parameter_40008 gauge
+nibe_parameter_40008{device_id="abc123def456",parameter_id="40008",parameter_name="BT1 Supply temp"} 35.2
 
-# HELP nibe_return_temperature_celsius Return temperature
-# TYPE nibe_return_temperature_celsius gauge
-nibe_return_temperature_celsius{device_id="abc123def456",name="BT3 Return temp",parameter_id="40083"} 28.5
+# HELP nibe_parameter_40083 BT3 Return temp
+# TYPE nibe_parameter_40083 gauge
+nibe_parameter_40083{device_id="abc123def456",parameter_id="40083",parameter_name="BT3 Return temp"} 28.5
 
-# HELP nibe_external_temperature_celsius External temperature
-# TYPE nibe_external_temperature_celsius gauge
-nibe_external_temperature_celsius{device_id="abc123def456",name="BT20 External temp",parameter_id="40045"} 5.1
+# HELP nibe_parameter_40045 BT20 External temp
+# TYPE nibe_parameter_40045 gauge
+nibe_parameter_40045{device_id="abc123def456",parameter_id="40045",parameter_name="BT20 External temp"} 5.1
 
-# HELP nibe_polls_total Total poll attempts
-# TYPE nibe_polls_total counter
-nibe_polls_total{device_id="abc123def456"} 2
+# HELP nibe_parameter_40057 Compressor frequency
+# TYPE nibe_parameter_40057 gauge
+nibe_parameter_40057{device_id="abc123def456",parameter_id="40057",parameter_name="Compressor frequency"} 45.0
 ```
 
 If you see metrics, **you're done!** The exporter is successfully fetching and exposing your heat pump data.

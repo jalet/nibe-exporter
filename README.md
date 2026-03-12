@@ -37,26 +37,21 @@ For development setup and building from source, see [Building from Source](#buil
 
 ## Metrics
 
-All metrics are gauges unless otherwise noted. Label format follows Prometheus conventions.
+All metrics are gauges. All NIBE heat pump parameters are emitted as generic `nibe_parameter_{id}` metrics, where `{id}` is the parameter ID from myUplink (e.g., `40008` for supply temperature). The human-readable parameter name appears in the `parameter_name` label.
 
-### Common Metrics
+### Example Metrics
 
 ```
-nibe_supply_temperature_celsius{device_id="...",parameter_id="40008",name="BT1 Supply temp"}
-nibe_return_temperature_celsius{device_id="...",parameter_id="40083",name="BT3 Return temp"}
-nibe_external_temperature_celsius{device_id="...",parameter_id="40045",name="BT20 External temp"}
-nibe_compressor_frequency_hz{device_id="...",parameter_id="40057"}
-nibe_total_power_consumption_watts{device_id="...",parameter_id="43005"}
+nibe_parameter_40008{device_id="abc123",parameter_id="40008",parameter_name="BT1 Supply temp"} 35.2
+nibe_parameter_40083{device_id="abc123",parameter_id="40083",parameter_name="BT3 Return temp"} 28.5
+nibe_parameter_40045{device_id="abc123",parameter_id="40045",parameter_name="BT20 External temp"} 5.1
+nibe_parameter_40057{device_id="abc123",parameter_id="40057",parameter_name="Compressor frequency"} 45.0
+nibe_parameter_43005{device_id="abc123",parameter_id="43005",parameter_name="Total power"} 2500.0
 ```
 
 ### Status Metrics
 
-```
-nibe_polls_total{device_id="..."}                      # Total poll attempts
-nibe_scrape_errors_total{device_id="..."}             # Scrape errors
-nibe_auth_failures_total{device_id="..."}             # Authentication failures (401)
-nibe_rate_limited_total{device_id="..."}              # Rate limit hits (429)
-```
+The exporter tracks internal counters for polling activity (`polls_total`), authentication failures (`auth_failures_total`), rate limiting (`rate_limited_total`), and scrape errors (`scrape_errors_total`). These counters are visible in logs at info level but **are not currently exported as Prometheus metrics**. To monitor exporter health, use the [`/healthz` and `/ready` endpoints](#endpoints) or the `up` metric from Prometheus (via `job_name`).
 
 ## API Version
 
@@ -69,14 +64,9 @@ Invalid versions are rejected at parse time.
 
 ## Metrics Mapping
 
-Parameter IDs from myUplink are mapped to Prometheus-friendly metric names:
+Currently, all parameters from myUplink are emitted as generic `nibe_parameter_{id}` metrics. Custom metric name mappings are a planned feature but not yet implemented. The parameter's human-readable name is available in the `parameter_name` label on each metric.
 
-- `40083` → `nibe_return_temperature_celsius`
-- `40008` → `nibe_supply_temperature_celsius`
-- `40045` → `nibe_external_temperature_celsius`
-- `40057` → `nibe_compressor_frequency_hz`
-- `43005` → `nibe_total_power_consumption_watts`
-- Other parameters → `nibe_parameter_{id}` (generic mapping)
+To rename or relabel metrics for Prometheus, use `relabel_configs` in your Prometheus `ServiceMonitor` or scrape configuration.
 
 ## Security
 
@@ -102,14 +92,27 @@ Parameter IDs from myUplink are mapped to Prometheus-friendly metric names:
 
 ## Configuration
 
-See **[Helm Production Deployment](docs/helm-deployment.md)** for comprehensive Helm configuration examples including:
-- Secret management with Kubernetes Secrets
-- myUplink `OAuth2` settings
+All configuration is via environment variables. Required and optional variables:
+
+| Variable | Default | Purpose | Example |
+|----------|---------|---------|---------|
+| `NIBE_CLIENT_ID` | — | myUplink OAuth2 Client ID | `abc123...` |
+| `NIBE_CLIENT_SECRET` | — | myUplink OAuth2 Client Secret | `xyz789...` |
+| `NIBE_API_VERSION` | `v2` | myUplink API version (`v2` or `v3`) | `v2` |
+| `NIBE_DEVICE_ID` | — | (Optional) Filter metrics to specific device ID | `device-abc123` |
+| `NIBE_POLL_INTERVAL` | `60` | Poll interval in seconds | `60` |
+| `NIBE_LISTEN_ADDR` | `0.0.0.0:9090` | HTTP server listen address | `127.0.0.1:9090` |
+| `NIBE_LOG_LEVEL` | `info` | Log verbosity (`trace`, `debug`, `info`, `warn`, `error`) | `info` |
+| `NIBE_LOG_JSON` | `false` | Enable JSON structured logging | `true` |
+| `NIBE_CLIENT_ID_FILE` | — | (Optional) Path to file containing Client ID (for Kubernetes) | `/run/secrets/client-id` |
+| `NIBE_CLIENT_SECRET_FILE` | — | (Optional) Path to file containing Client Secret (for Kubernetes) | `/run/secrets/client-secret` |
+| `NIBE_METRICS_MAPPING_FILE` | — | (Optional, unused) Path to custom metrics mapping file (planned feature) | — |
+
+For Kubernetes deployment, see **[Helm Production Deployment](docs/helm-deployment.md)** for comprehensive configuration examples including:
+- Secret management with Kubernetes Secrets (using `NIBE_CLIENT_ID_FILE` and `NIBE_CLIENT_SECRET_FILE`)
 - Prometheus `ServiceMonitor` and `PrometheusRule`
 - Network policies (standard Kubernetes and Cilium)
 - Grafana dashboard integration
-
-For API version and metrics mapping reference, see [API Version](#api-version) and [Metrics Mapping](#metrics-mapping) sections below.
 
 ## Building from Source
 

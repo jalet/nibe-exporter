@@ -94,19 +94,17 @@ networkPolicy:
 
 ## Step 3: Install the Helm Chart
 
-Add the Helm repository and install:
+The chart is published as an OCI artifact. Install directly using the OCI URL:
 
 ```bash
-# Add the repository (one-time setup)
-helm repo add nibe-exporter oci://ghcr.io/jalet/nibe-exporter
-helm repo update
-
 # Install the chart
-helm install nibe-exporter nibe-exporter/nibe-exporter \
+helm install nibe-exporter oci://ghcr.io/jalet/nibe-exporter-rs/nibe-exporter \
   --namespace monitoring \
   --create-namespace \
   -f values-prod.yaml
 ```
+
+Note: OCI registries do not require `helm repo add` or `helm repo update`. Install and upgrade directly with the OCI URL.
 
 Watch the rollout:
 
@@ -168,12 +166,14 @@ If the target shows **DOWN**, check:
 
 ## Step 6: (Optional) Enable Alerting Rules
 
-If you enabled `prometheusRule.enabled: true` in Step 2, the chart creates PrometheusRule objects with alerts for:
+If you enabled `prometheusRule.enabled: true` in Step 2, the chart creates PrometheusRule objects with the following alerts:
 
-- **ExporterDown** — Pod down for 5+ minutes
-- **AuthenticationFailures** — Repeated 401 errors
-- **RateLimited** — API rate limiting detected
-- **ScrapeErrors** — Metrics collection failing
+- **NIBEExporterDown** — Pod down for 5+ minutes (firing status from Prometheus `up` metric)
+- **NIBEAuthenticationFailures** — Repeated 401 errors
+- **NIBEHighRateLimit** — API rate limiting detected
+- **NIBEScrapeErrors** — Metrics collection failing
+
+**Note**: Three alerts (`NIBEAuthenticationFailures`, `NIBEHighRateLimit`, `NIBEScrapeErrors`) reference counter metrics that are currently tracked internally but not exported to Prometheus. These alerts will not fire until the exporter is updated to export these counters. For now, monitor exporter health via the `NIBEExporterDown` alert or check logs directly.
 
 To view the rules:
 
@@ -231,13 +231,13 @@ curl http://localhost:9090/metrics | head -20
 You should see metrics like:
 
 ```
-# HELP nibe_supply_temperature_celsius Supply temperature
-# TYPE nibe_supply_temperature_celsius gauge
-nibe_supply_temperature_celsius{device_id="...",name="BT1 Supply temp",parameter_id="40008"} 35.2
+# HELP nibe_parameter_40008 BT1 Supply temp
+# TYPE nibe_parameter_40008 gauge
+nibe_parameter_40008{device_id="...",parameter_id="40008",parameter_name="BT1 Supply temp"} 35.2
 
-# HELP nibe_polls_total Total poll attempts
-# TYPE nibe_polls_total counter
-nibe_polls_total{device_id="..."} 42
+# HELP nibe_parameter_40083 BT3 Return temp
+# TYPE nibe_parameter_40083 gauge
+nibe_parameter_40083{device_id="...",parameter_id="40083",parameter_name="BT3 Return temp"} 28.5
 ```
 
 If metrics are missing:
@@ -249,21 +249,15 @@ If metrics are missing:
 
 ### Upgrade to a New Version
 
-1. Update the chart repository:
+Upgrade to a new chart version using the OCI URL:
 
 ```bash
-helm repo update nibe-exporter
-```
-
-2. Upgrade:
-
-```bash
-helm upgrade nibe-exporter nibe-exporter/nibe-exporter \
+helm upgrade nibe-exporter oci://ghcr.io/jalet/nibe-exporter-rs/nibe-exporter \
   -n monitoring \
   -f values-prod.yaml
 ```
 
-3. Check rollout status:
+Check rollout status:
 
 ```bash
 kubectl rollout status deployment/nibe-exporter -n monitoring
