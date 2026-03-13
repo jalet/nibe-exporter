@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/jalet/nibe-exporter/compare/v0.3.2...v0.4.0) (2026-03-13)
+
+
+### Features
+
+* add info logging to metrics poll loop ([04d03aa](https://github.com/jalet/nibe-exporter/commit/04d03aaa4c9715746f23a098a6ceede098cd6996))
+
+
+### Bug Fixes
+
+* replace unwrap() with expect() in tests and fix clippy warnings ([73975cc](https://github.com/jalet/nibe-exporter/commit/73975cc80c80325bc848d42937427d2bb5e9a61f))
+
 ## [0.3.2](https://github.com/jalet/nibe-exporter/compare/v0.3.1...v0.3.2) (2026-03-12)
 
 
