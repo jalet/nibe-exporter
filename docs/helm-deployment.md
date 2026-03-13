@@ -173,7 +173,9 @@ If you enabled `prometheusRule.enabled: true` in Step 2, the chart creates Prome
 - **NIBEHighRateLimit** — API rate limiting detected
 - **NIBEScrapeErrors** — Metrics collection failing
 
-**Note**: Three alerts (`NIBEAuthenticationFailures`, `NIBEHighRateLimit`, `NIBEScrapeErrors`) reference counter metrics that are currently tracked internally but not exported to Prometheus. These alerts will not fire until the exporter is updated to export these counters. For now, monitor exporter health via the `NIBEExporterDown` alert or check logs directly.
+**Note**: Three alerts (`NIBEAuthenticationFailures`, `NIBEHighRateLimit`, `NIBEScrapeErrors`) reference counter metrics (`auth_failures_total`, `rate_limited_total`, `scrape_errors_total`) that are currently tracked internally and visible in exporter logs at debug/info level, but **not exported as Prometheus metrics**. These alerts will not fire until the exporter is updated to export these counters as gauge metrics. For now, monitor exporter health via:
+- The `NIBEExporterDown` alert (which uses the `up` metric from Prometheus)
+- Exporter logs with `NIBE_LOG_LEVEL=debug` to see authentication, rate limit, and error events
 
 To view the rules:
 
