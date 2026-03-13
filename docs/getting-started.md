@@ -99,12 +99,17 @@ docker run --rm \
 3. Watch the logs. You should see output like:
 
 ```
-{"timestamp":"2026-03-09T...","level":"INFO","message":"Starting NIBE exporter"}
-{"timestamp":"2026-03-09T...","level":"INFO","message":"Listening on 0.0.0.0:9090"}
-{"timestamp":"2026-03-09T...","level":"DEBUG","message":"Polling heat pump metrics"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"Starting nibe-exporter"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"API version: v2"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"Listen: 0.0.0.0:9090"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"Poll interval: 60s"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"myUplink client configured"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"Metrics polling loop spawned"}
+{"timestamp":"2026-03-09T...","level":"INFO","message":"HTTP server listening on 0.0.0.0:9090"}
+{"timestamp":"2026-03-09T...","level":"DEBUG","message":"Metrics poll succeeded"}
 ```
 
-If you see errors like "invalid client_id" or "access denied", double-check your credentials from Step 1.
+The `"Metrics poll succeeded"` message appears at debug level every 60 seconds (or whatever interval you set with `NIBE_POLL_INTERVAL`). If you see errors like "invalid client_id" or "access denied", double-check your credentials from Step 1.
 
 ## Step 4: Verify It's Working
 
@@ -160,6 +165,8 @@ If you see metrics, **you're done!** The exporter is successfully fetching and e
 | `/ready` returns 503 | Exporter is still authenticating. Wait 10-15 seconds and try again. |
 | Metrics show all zeros or are missing | Credentials may be incorrect. Verify Client ID and Secret from myUplink portal. |
 | Rate limit errors in logs | Poll interval is too aggressive. Increase `NIBE_POLL_INTERVAL` (default: 60 seconds). |
+| Not seeing polling activity in logs | Log level is too high. Set `NIBE_LOG_LEVEL=debug` to see `"Metrics poll succeeded"` messages every 60 seconds. Set to `info` for startup logs only. |
+| Seeing authentication or rate limit errors | Set `NIBE_LOG_LEVEL=debug` to see detailed error logs. Check your Client ID/Secret on the myUplink portal or review your API rate limit quota. |
 
 ## Next Steps
 
