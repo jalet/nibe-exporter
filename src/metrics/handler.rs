@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use tokio::sync::RwLock;
 use tokio::time::{MissedTickBehavior, interval};
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 /// Metrics store with caching and counters.
 pub struct MetricsStore {
@@ -91,6 +91,10 @@ impl MetricsStore {
         client: &MyUplinkClient,
         device_id: Option<&str>,
     ) -> Result<(), MyUplinkError> {
+        let started = std::time::Instant::now();
+        let mut devices_processed: usize = 0;
+        let mut params_processed: usize = 0;
+
         let devices = client.fetch_devices().await?;
 
         let mut samples = vec![];
@@ -102,6 +106,8 @@ impl MetricsStore {
                     continue;
                 }
             }
+
+            devices_processed += 1;
 
             if let Some(params) = device.parameters {
                 for param in params {
@@ -116,6 +122,7 @@ impl MetricsStore {
                                 &device.device_id,
                             );
                             samples.extend(samples_for_param);
+                            params_processed += 1;
                         }
                     }
                 }
@@ -124,6 +131,12 @@ impl MetricsStore {
 
         let encoded = encode_metrics(&samples);
         self.update_metrics(encoded).await;
+        info!(
+            "Polled {} device(s), {} parameter(s) in {:?}",
+            devices_processed,
+            params_processed,
+            started.elapsed()
+        );
         Ok(())
     }
 
@@ -180,9 +193,7 @@ pub fn spawn_poll_loop(
         loop {
             ticker.tick().await;
             match store.fetch_and_encode(&client, device_id.as_deref()).await {
-                Ok(()) => {
-                    debug!("Metrics poll succeeded");
-                }
+                Ok(()) => {}
                 Err(MyUplinkError::Unauthorized) => {
                     store.increment_auth_failures();
                     warn!("Authentication failed during poll");
