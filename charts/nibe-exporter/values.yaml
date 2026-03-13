@@ -118,6 +118,28 @@ prometheusRule:
   enabled: false
   namespace: ''
   labels: {}
+  # Additional alert rules appended to the nibe-exporter.rules group.
+  # Use this to add parameter-based alerts after applying metricRelabeling
+  # to rename nibe_parameter_* series to human-readable metric names.
+  # Each entry is a standard PrometheusRule rule object.
+  # Example:
+  # additionalRules:
+  #   - alert: NIBEHighOutdoorTemperature
+  #     expr: nibe_outdoor_temperature_celsius > 35
+  #     for: 10m
+  #     labels:
+  #       severity: warning
+  #     annotations:
+  #       summary: "High outdoor temperature"
+  #       description: "Outdoor temperature is above 35°C."
+  #   - alert: NIBELowReturnTemperature
+  #     expr: nibe_return_line_temperature_celsius < 20
+  #     for: 15m
+  #     labels:
+  #       severity: warning
+  #     annotations:
+  #       summary: "Low return line temperature"
+  additionalRules: []
 
 # NetworkPolicy
 networkPolicy:
