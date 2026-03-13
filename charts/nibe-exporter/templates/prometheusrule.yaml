@@ -49,4 +49,7 @@ spec:
       annotations:
         summary: "NIBE exporter scrape errors"
         description: "NIBE exporter is encountering errors scraping device metrics."
+    {{- with .Values.prometheusRule.additionalRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end }}
