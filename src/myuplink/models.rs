@@ -223,7 +223,9 @@ mod tests {
 
     #[test]
     fn test_numeric_value_as_numeric() {
-        let value = ParameterValue::Numeric(serde_json::Number::from_f64(45.5).unwrap());
+        let value = ParameterValue::Numeric(
+            serde_json::Number::from_f64(45.5).expect("test value is a valid f64"),
+        );
         assert_eq!(value.as_numeric(), Some(45.5));
     }
 
@@ -235,7 +237,9 @@ mod tests {
 
     #[test]
     fn test_as_numeric_scaled() {
-        let value = ParameterValue::Numeric(serde_json::Number::from_f64(100.0).unwrap());
+        let value = ParameterValue::Numeric(
+            serde_json::Number::from_f64(100.0).expect("test value is a valid f64"),
+        );
         assert_eq!(value.as_numeric_scaled(-2), Some(1.0));
         assert_eq!(value.as_numeric_scaled(0), Some(100.0));
     }

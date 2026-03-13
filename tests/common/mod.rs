@@ -10,6 +10,7 @@ pub fn build_test_state() -> AppState {
 }
 
 /// Helper to create a test metrics store with initial data.
+#[allow(dead_code)]
 pub fn build_test_metrics_store_with_data(initial_metrics: &str) -> Arc<MetricsStore> {
     let store = Arc::new(MetricsStore::new());
     let store_clone = store.clone();

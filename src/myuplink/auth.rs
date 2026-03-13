@@ -171,8 +171,9 @@ mod tests {
     fn test_token_state_validity() {
         let now_ms = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_millis() as u64;
+            .expect("system time is after UNIX_EPOCH")
+            .as_millis();
+        let now_ms = u64::try_from(now_ms).expect("millis fit in u64");
 
         // Valid token (expires in 1 minute)
         let valid = TokenState {

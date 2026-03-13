@@ -333,8 +333,8 @@ mod tests {
 
     #[test]
     fn test_base_url_construction() {
-        let client =
-            MyUplinkClient::new("id".to_string(), "secret".to_string(), "v2".to_string()).unwrap();
+        let client = MyUplinkClient::new("id".to_string(), "secret".to_string(), "v2".to_string())
+            .expect("valid test client config");
         assert_eq!(client.base_url(), "https://api.myuplink.com/v2");
         assert_eq!(client.api_version(), "v2");
     }

@@ -55,9 +55,9 @@ graph LR
 ```
 
 **Key components:**
-- **TokenManager** (`auth.rs`) - OAuth2 token refresh with double-check locking
-- **MyUplinkClient** (`client.rs`) - Handles API calls, rate limit handling, and token refresh
-- **MetricsStore** (`handler.rs`) - In-memory metrics cache with Arc<String> for efficient reads
+- **`TokenManager`** (`auth.rs`) - `OAuth2` token refresh with double-check locking
+- **`MyUplinkClient`** (`client.rs`) - Handles API calls, rate limit handling, and token refresh
+- **`MetricsStore`** (`handler.rs`) - In-memory metrics cache with Arc<String> for efficient reads
 - **Axum Server** (`server.rs`) - HTTP server with health, readiness, and metrics endpoints
 
 ## Metrics
