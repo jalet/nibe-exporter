@@ -61,6 +61,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn test_map_parameter() {
         let samples = map_parameter_to_samples("40012", Some("Return line (BT3)"), 29.6, "device1");
         assert_eq!(samples.len(), 1);

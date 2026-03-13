@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use nibe_exporter::metrics::{MetricSample, MetricType, encode_metrics};
 use std::collections::HashMap;
 
@@ -190,7 +192,7 @@ fn snapshot_metric_with_scientific_notation() {
         name: "nibe_small_value".to_string(),
         metric_type: MetricType::Gauge,
         help: "Very small measurement".to_string(),
-        value: 0.00001234,
+        value: 0.000_012_34,
         labels,
     };
 

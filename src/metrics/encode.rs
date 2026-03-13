@@ -138,9 +138,15 @@ mod tests {
 
         let formatted = format_labels(&labels);
         // Check order: a_first should come before m_middle, which should come before z_last
-        let a_pos = formatted.find("a_first").unwrap();
-        let m_pos = formatted.find("m_middle").unwrap();
-        let z_pos = formatted.find("z_last").unwrap();
+        let a_pos = formatted
+            .find("a_first")
+            .expect("label key present in formatted output");
+        let m_pos = formatted
+            .find("m_middle")
+            .expect("label key present in formatted output");
+        let z_pos = formatted
+            .find("z_last")
+            .expect("label key present in formatted output");
         assert!(a_pos < m_pos && m_pos < z_pos);
     }
 

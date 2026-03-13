@@ -81,10 +81,10 @@ mod tests {
                 Request::builder()
                     .uri("/healthz")
                     .body(Body::empty())
-                    .unwrap(),
+                    .expect("valid test request"),
             )
             .await
-            .unwrap();
+            .expect("valid test request");
 
         assert_eq!(response.status(), StatusCode::OK);
     }
@@ -101,10 +101,10 @@ mod tests {
                 Request::builder()
                     .uri("/ready")
                     .body(Body::empty())
-                    .unwrap(),
+                    .expect("valid test request"),
             )
             .await
-            .unwrap();
+            .expect("valid test request");
 
         // Should return 503 if metrics not yet available
         assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
@@ -123,14 +123,17 @@ mod tests {
                 Request::builder()
                     .uri("/metrics")
                     .body(Body::empty())
-                    .unwrap(),
+                    .expect("valid test request"),
             )
             .await
-            .unwrap();
+            .expect("valid test request");
 
         assert_eq!(response.status(), StatusCode::OK);
         assert_eq!(
-            response.headers().get("content-type").unwrap(),
+            response
+                .headers()
+                .get("content-type")
+                .expect("content-type header is present"),
             "application/openmetrics-text; version=1.0.0; charset=utf-8"
         );
     }

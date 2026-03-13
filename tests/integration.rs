@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 mod common;
 
 use axum::body::Body;
@@ -46,7 +48,9 @@ fn test_client_accepts_valid_v3() {
 /// Test 4: `ParameterValue` numeric conversion.
 #[test]
 fn test_parameter_value_numeric_conversion() {
-    let numeric = ParameterValue::Numeric(serde_json::Number::from_f64(42.5).unwrap());
+    let numeric = ParameterValue::Numeric(
+        serde_json::Number::from_f64(42.5).expect("test value is a valid f64"),
+    );
     assert_eq!(numeric.as_numeric(), Some(42.5));
 
     let string = ParameterValue::String("32.1".to_string());
@@ -59,7 +63,9 @@ fn test_parameter_value_numeric_conversion() {
 /// Test 5: `ParameterValue` scaling.
 #[test]
 fn test_parameter_value_scaling() {
-    let value = ParameterValue::Numeric(serde_json::Number::from_f64(100.0).unwrap());
+    let value = ParameterValue::Numeric(
+        serde_json::Number::from_f64(100.0).expect("test value is a valid f64"),
+    );
     assert_eq!(value.as_numeric_scaled(0), Some(100.0));
     assert_eq!(value.as_numeric_scaled(-2), Some(1.0));
     assert_eq!(value.as_numeric_scaled(1), Some(1000.0));
@@ -100,10 +106,10 @@ async fn test_healthz_endpoint() {
             Request::builder()
                 .uri("/healthz")
                 .body(Body::empty())
-                .unwrap(),
+                .expect("valid test request"),
         )
         .await
-        .unwrap();
+        .expect("valid test request");
 
     assert_eq!(response.status(), 200);
 }
@@ -119,10 +125,10 @@ async fn test_ready_endpoint_not_ready() {
             Request::builder()
                 .uri("/ready")
                 .body(Body::empty())
-                .unwrap(),
+                .expect("valid test request"),
         )
         .await
-        .unwrap();
+        .expect("valid test request");
 
     assert_eq!(response.status(), 503);
 }
@@ -144,10 +150,10 @@ async fn test_ready_endpoint_ready() {
             Request::builder()
                 .uri("/ready")
                 .body(Body::empty())
-                .unwrap(),
+                .expect("valid test request"),
         )
         .await
-        .unwrap();
+        .expect("valid test request");
 
     assert_eq!(response.status(), 200);
 }
@@ -169,18 +175,18 @@ async fn test_metrics_endpoint() {
             Request::builder()
                 .uri("/metrics")
                 .body(Body::empty())
-                .unwrap(),
+                .expect("valid test request"),
         )
         .await
-        .unwrap();
+        .expect("valid test request");
 
     assert_eq!(response.status(), 200);
     let content_type = response
         .headers()
         .get("content-type")
-        .unwrap()
+        .expect("content-type header is present")
         .to_str()
-        .unwrap();
+        .expect("content-type is valid UTF-8");
     assert!(content_type.contains("openmetrics-text"));
 }
 
