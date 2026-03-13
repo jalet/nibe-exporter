@@ -2,6 +2,8 @@
 
 A high-performance Prometheus exporter for NIBE heat pumps via the myUplink REST API. Written in Rust with careful attention to security, reliability, and operational excellence.
 
+![NIBE Heat Pump](docs/NIBE%20Heat%20Pump-1773386062103.png)
+
 ## Features
 
 - **`OAuth2` Authentication**: Secure token management with double-check locking pattern
@@ -34,6 +36,29 @@ For development setup and building from source, see [Building from Source](#buil
 - `GET /healthz` - Health check (always 200 OK)
 - `GET /ready` - Readiness check (200 OK when metrics available)
 - `GET /metrics` - Prometheus metrics in `OpenMetrics` format
+
+## Architecture
+
+The exporter polls NIBE heat pump parameters via the myUplink Cloud API, caches them in memory, and exposes them as Prometheus metrics:
+
+```mermaid
+graph LR
+    A["NIBE Heat Pump"] -->|polls parameters| B["myUplink Cloud API"]
+    B -->|OAuth2 token endpoint| C["TokenManager<br/>(auth.rs)"]
+    B -->|device/parameter API| D["MyUplinkClient<br/>(client.rs)"]
+    C -->|refresh| B
+    D -->|parameters| E["MetricsStore<br/>(handler.rs)"]
+    E -->|encode| F["Axum HTTP Server<br/>(server.rs)"]
+    F -->|/metrics| G["Prometheus"]
+    G -->|scrape| H["Grafana"]
+    F -->|/healthz<br/>/ready| I["Health Probes"]
+```
+
+**Key components:**
+- **TokenManager** (`auth.rs`) - OAuth2 token refresh with double-check locking
+- **MyUplinkClient** (`client.rs`) - Handles API calls, rate limit handling, and token refresh
+- **MetricsStore** (`handler.rs`) - In-memory metrics cache with Arc<String> for efficient reads
+- **Axum Server** (`server.rs`) - HTTP server with health, readiness, and metrics endpoints
 
 ## Metrics
 
