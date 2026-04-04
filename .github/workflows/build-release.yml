@@ -101,4 +101,4 @@ jobs:
 
       - name: Push Helm chart to OCI registry
         run: |
-          helm push nibe-exporter-${{ steps.version.outputs.version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}
+          helm push nibe-exporter-${{ steps.version.outputs.version }}.tgz oci://${{ env.REGISTRY }}/jalet/helm-charts
