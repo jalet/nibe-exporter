@@ -9,7 +9,7 @@ This tutorial walks you through setting up the NIBE Exporter for the first time.
 Before starting, ensure you have:
 
 - A myUplink account (create one at https://myuplink.com if you don't have one)
-- Docker installed locally (`docker --version` should work), OR Rust 1.85.0+ for local build
+- Docker installed locally (`docker --version` should work), OR Rust 1.94+ for local build
 - `curl` or a browser to make HTTP requests
 - Your NIBE heat pump already registered in myUplink
 

@@ -143,7 +143,7 @@ For Kubernetes deployment, see **[Helm Production Deployment](docs/helm-deployme
 
 ### Prerequisites
 
-- Rust 1.85.0+ (check with `rustc --version`)
+- Rust 1.94+ (check with `rustc --version`)
 - Linux/macOS/Windows with standard build tools
 
 ### Build
