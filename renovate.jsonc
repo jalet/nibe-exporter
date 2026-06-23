@@ -1,0 +1,15 @@
+{
+  // Renovate config. Renovate parses JSONC (comments allowed); the `.json` form was
+  // removed so this file is the one Renovate reads (it picks renovate.json before
+  // renovate.jsonc when both exist).
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    // Recommended defaults: enables the Dependency Dashboard issue (off by default),
+    // plus package grouping, semantic commit prefixes, and merge-confidence badges.
+    "config:recommended",
+    // Automerge minor AND patch updates (majors stay manual PRs, listed on the dashboard).
+    ":automergeMinor",
+    // Automerge digest / SHA pin updates (e.g. pinned container image digests).
+    ":automergeDigest"
+  ]
+}
