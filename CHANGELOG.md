@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3](https://github.com/jalet/nibe-exporter/compare/v0.7.2...v0.7.3) (2026-06-24)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate thiserror to v2 ([#39](https://github.com/jalet/nibe-exporter/issues/39)) ([c5f0dd4](https://github.com/jalet/nibe-exporter/commit/c5f0dd42840509ef47cf808b551aab127c9b5d89))
+
 ## [0.7.2](https://github.com/jalet/nibe-exporter/compare/v0.7.1...v0.7.2) (2026-06-24)
 
 
