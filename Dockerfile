@@ -1,5 +1,5 @@
 # Stage 1: Chef base (install cargo-chef once)
-FROM --platform=${BUILDPLATFORM} rust:1.94 AS chef
+FROM --platform=${BUILDPLATFORM} rust:1.96 AS chef
 WORKDIR /app
 RUN cargo install cargo-chef
 
@@ -14,7 +14,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # Stage 4: Builder
-FROM --platform=${BUILDPLATFORM} rust:1.94 AS builder
+FROM --platform=${BUILDPLATFORM} rust:1.96 AS builder
 WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
