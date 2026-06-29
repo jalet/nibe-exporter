@@ -22,7 +22,7 @@ COPY --from=cacher /usr/local/cargo /usr/local/cargo
 RUN cargo build --release --bin nibe-exporter
 
 # Stage 5: Runtime
-FROM gcr.io/distroless/cc-debian12:nonroot
+FROM gcr.io/distroless/cc-debian13:nonroot
 COPY --from=builder /app/target/release/nibe-exporter /
 
 EXPOSE 9090
