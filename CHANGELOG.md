@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6](https://github.com/jalet/nibe-exporter/compare/v0.7.5...v0.7.6) (2026-06-29)
+
+
+### Bug Fixes
+
+* **docker:** upgrade runtime to distroless/cc-debian13 ([#44](https://github.com/jalet/nibe-exporter/issues/44)) ([215fc0d](https://github.com/jalet/nibe-exporter/commit/215fc0d9d2a05963b2a7c7259e4feb4fadba249e))
+
 ## [0.7.5](https://github.com/jalet/nibe-exporter/compare/v0.7.4...v0.7.5) (2026-06-28)
 
 
